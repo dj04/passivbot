@@ -2,11 +2,11 @@
   passivbot
 </h1>
 
-![passivbot Version](https://img.shields.io/badge/passivbot-3.5.3-blue)
+![passivbot Version](https://img.shields.io/badge/passivbot-0.0.1-blue)
 
-## Trading bot running on Bybit and Binance Futures
+## BybitとBinance Futuresで動作するトレーディングボット
 
-:warning: **Use at own risk** :warning:
+:warning: **ご自身の責任でご利用ください** :warning:
 
 ## Overview
 
