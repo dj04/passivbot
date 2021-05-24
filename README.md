@@ -10,28 +10,29 @@
 
 ## Overview
 
-The bot's purpose is to accumulate tokens over time
+ボットの目的は、時間をかけてトークンを蓄積することです
 
-It is a market maker bot working in futures markets, making multiple post only limit orders above and below current
-price
+先物市場で働くマーケットメーカーボットで、現在の価格の上下に複数のPost-Only設定で指値注文を出します。
 
-It listens to websocket live stream of trades, and updates its orders continuously
+取引のwebsocket(※1)ライブ配信を聞き、継続的に注文を更新します。
 
-If possible, it will use hedge mode
+(※1：Webにおいて双方向通信を低コストで行うための仕組み。httpの双方向通信アップグレード版)
+
+可能であれば、ヘッジモードを使用します。
 
 
-### Requirements
+### 要求事項
 
 - Python >= 3.8
-- [requirements.txt](requirements.txt) dependencies
+- [requirements.txt](requirements.txt) 依存するPythonパッケージ
 
-### Setup dependencies
+### 依存するPythonパッケージ（ライブラリ）のSetup
 
 ```bash
     pip install -r requirements.txt
 ```
 
-### Usage:
+### 使い方:
 
 #### Supports exchanges Bybit futures and Binance futures, using hedge mode when supported
 
