@@ -34,52 +34,47 @@
 
 ### 使い方:
 
-#### Supports exchanges Bybit futures and Binance futures, using hedge mode when supported
+#### 取引所のBybit先物とBinance先物をサポートし、サポートされている場合はヘッジモードを使用します。
 
-1. Add your api key and secret in file [api-keys.json](api-keys.json)
+1. [api-keys.json](api-keys.json)というファイルにあなたのapiキーとシークレットを追加します。
 2. ```bash
    python3 start_bot.py {account_name} {symbol} {path/to/config.json}
    ```
 
-Example:
+例:
 
 ```bash
 python3 start_bot.py binance_01 XMRUSDT configs/live/binance_xmrusdt.json
 ```
 
-#### Run with docker
+#### dockerで起動
 
-Modify command with exchange and user_name in [docker-compose.yml](docker-compose.yml) and start
-with `docker-compose up -d` (-d for background run). All code and files generated are in original git folder.
+[docker-compose.yml](docker-compose.yml)のexchangeとuser_nameでコマンドを修正し、`docker-compose up -d`(バックグラウンドで実行する場合は-d)で起動します。
+生成されたコードやファイルはすべてオリジナルのgitフォルダにあります。
 
-#### Stopping bot
+#### botの停止
 
-For graceful stopping of the bot, set `do_long`and `do_shrt` both to `false`, and bot will continue as normal, opening
-no new positions, until all existing positions are closed.
+botを停止させるには、`do_long`と`do_shrt`の両方を`false`に設定します。
+botは、既存のポジションがすべて閉じられるまで、新しいポジションを開くことなく、通常通りに動作します。
 
-#### Setting up Telegram
+#### Telegramの設定
 
-The bot provides interfacing with the bot via Telegram via a telegram bot. In order to set it up, you'll need a telegram
-bot token and a chat-id. Once you have those, you can enable teleegram for each individual account that is specified in
-the api-keys.json file. There is an example telegram configuration in that file to get started. If a telegram configuration
-is not present for an account, telegram is disabled at startup.
+このbotは、Telegramを介してbotとのインターフェイスを提供しています。
+これを設定するには、Telegramのbotトークンとchat-idが必要です。
+これらを入手したら、api-keys.jsonファイルで指定された個々のアカウントに対してTelegramを有効にします。
+api-keys.jsonファイルにはTelegramの設定例がありますので、それを参考にしてください。
+もし、あるアカウントにTelegramの設定が存在しない場合、Telegramは起動時に無効になります。
 
-For setup instructions, see https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-telegram?view=azure-bot-service-4.0
+セットアップ方法については https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-telegram?view=azure-bot-service-4.0
 
-Start a chat with @getmyid_bot in telegram to get chat id.
+チャットIDを取得するには、Telegramで@getmyid_botとチャットを開始してください。
 
-There are several commands & messages provided via Telegram, please issue a `/help` command in the telegram chat to see
-all the options.
+Telegramでは、いくつかのコマンドやメッセージが提供されていますので、Telegramチャットで`/help`コマンドを発行して
+すべてのオプションを見ることができます。
 
-### Documentation [WIP], see the wiki at:
+### ドキュメント[WIP], 下記のwikiを参照してください:
 
 https://github.com/enarjord/passivbot/wiki
-
-### Support
-
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/QAF2H2UmzZ)
-
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/passivbot_futures)
 
 ### Resources
 
