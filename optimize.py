@@ -12,8 +12,29 @@ import nevergrad as ng
 import numpy as np
 import ray
 from ray import tune
+# Hyperband: A Novel Bandit-Based Approach to Hyperparameter Optimization
+# https://arxiv.org/abs/1603.06560
+# 機械学習アルゴリズムの性能は、優れたハイパーパラメータのセットを特定することに依存する。
+# 最近のアプローチでは、ベイズ最適化を用いて設定を適応的に選択していますが、
+# 我々は適応的な資源配分と早期停止によってランダム探索を高速化することに焦点を当てています。
+# ハイパーパラメータの最適化を、純粋探索型の非ストキャスティック(非確率的な)無限腕バンディット問題として定式化し、
+# 反復、データサンプル、特徴などの事前に定義されたリソースを、ランダムにサンプリングされた構成に割り当てます。
+# このフレームワークのための新しいアルゴリズムHyperbandを紹介し、その理論的特性を分析して、
+# いくつかの望ましい保証を提供します。
+# さらに、一連のハイパーパラメータ最適化問題において、Hyperbandを一般的なベイジアン最適化手法と比較します。
+# 様々な深層学習やカーネルベースの学習問題において、Hyperbandは他の手法と比較して1桁以上の高速化を実現できる
+
+# ※多腕バンディット問題
+# https://en.wikipedia.org/wiki/Multi-armed_bandit
+# 確率論や機械学習において，各選択肢の特性が割り当て時には部分的にしか分からず，
+# 時間の経過や選択肢に資源を割り当てることでより理解できるようになる可能性がある場合に，
+# 一定の限られた資源を競合する（代替）選択肢の間に期待利得を最大化する方法で割り当てなければならない問題である
 from ray.tune.schedulers import AsyncHyperBandScheduler
+# 同時並列で実行する学習の数を制限することができる
+# https://qiita.com/_akisato/items/f2bdbe37df5dffc883fc
 from ray.tune.suggest import ConcurrencyLimiter
+# Nevergradを使用してハイパーパラメータを最適化します。
+# Nevergradは、Facebookが提供するオープンソースのツールで、派生的な自由な最適化が可能です。詳細は https://github.com/facebookresearch/nevergrad をご覧ください。
 from ray.tune.suggest.nevergrad import NevergradSearch
 
 from analyze import analyze_fills, get_empty_analysis, objective_function
@@ -38,6 +59,8 @@ def create_config(backtest_config: dict) -> dict:
         if backtest_config['ranges'][k][0] == backtest_config['ranges'][k][1]:
             config[k] = backtest_config['ranges'][k][0]
         elif k in ['n_close_orders', 'leverage']:
+            # tune.randint:整数値をlowerとupperの間で一様にサンプリングします。
+            # https://docs.ray.io/en/master/tune/api_docs/search_space.html#tune-randint
             config[k] = tune.randint(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1] + 1)
         else:
             config[k] = tune.uniform(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1])
