@@ -81,6 +81,7 @@ Temporary Items
 # .idea/modules
 # *.iml
 # *.ipr
+*.bak
 
 # CMake
 cmake-build-*/
