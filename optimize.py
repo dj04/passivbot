@@ -196,9 +196,24 @@ def backtest_tune(ticks: np.ndarray, backtest_config: dict, current_best: Union[
             current_best = clean_start_config(current_best, config, backtest_config['ranges'])
             current_best_params.append(current_best)
 
+    # num_cpus: マシン上に利用可能なGPUがある場合は、num_gpus引数でこれを指定します。同様に、CPUの数をnum_cpusで指定することもできます。
+    # https://docs.ray.io/en/ray-0.3.0/api.html
     ray.init(num_cpus=num_cpus, logging_level=logging.FATAL, log_to_driver=False)
+    # PSO: パーティクルスウォーム最適化
+    # 計算科学における粒子群最適化（PSO）は，与えられた品質指標に基づいて解の候補を反復的に改善することで問題を最適化する計算手法です．
+    # PSOでは、粒子と呼ばれる解答候補の集団を用意し、粒子の位置と速度に関する簡単な数式に従って、これらの粒子を探索空間内で移動させることで問題を解決します。
+    # 各粒子の動きは、その局所的な既知のベストポジションに影響されますが、他の粒子によってより良いポジションが発見されると更新される、
+    # 探索空間内の既知のベストポジションにも導かれます。
+    # これは、他の粒子によってより良い位置が発見されると更新されます。これにより、群が最良のソリューションに向かって移動することが期待されます。
+    # https://en.wikipedia.org/wiki/Particle_swarm_optimization
+    # transform: PSO最適化空間からR空間へのマッピングに使用する変換の名前。
+    # popsize: 粒子群の人口サイズ。デフォルトはmax(40, num_workers)です。
+    # https://facebookresearch.github.io/nevergrad/optimizers_ref.html
     pso = ng.optimizers.ConfiguredPSO(transform='identity', popsize=n_particles, omega=omega, phip=phi1, phig=phi2)
     algo = NevergradSearch(optimizer=pso, points_to_evaluate=current_best_params)
+    # ray.tune.suggest.ConcurrencyLimiter を使用して、検索アルゴリズムを使用する際の同時実行の量を制限します。
+    # これは、与えられた最適化アルゴリズムがあまりうまく並列化されない場合 (素朴なベイジアン最適化のような場合) に便利です。
+    # https://docs.ray.io/en/master/tune/api_docs/suggestion.html#limiter
     algo = ConcurrencyLimiter(algo, max_concurrent=num_cpus)
     scheduler = AsyncHyperBandScheduler()
 
