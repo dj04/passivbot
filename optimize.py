@@ -10,8 +10,10 @@ from typing import Union
 
 import nevergrad as ng
 import numpy as np
-import ray
-from ray import tune
+# import ray
+import optuna
+from optuna import trial
+# from ray import tune
 # Hyperband: A Novel Bandit-Based Approach to Hyperparameter Optimization
 # https://arxiv.org/abs/1603.06560
 # 機械学習アルゴリズムの性能は、優れたハイパーパラメータのセットを特定することに依存する。
@@ -29,13 +31,13 @@ from ray import tune
 # 確率論や機械学習において，各選択肢の特性が割り当て時には部分的にしか分からず，
 # 時間の経過や選択肢に資源を割り当てることでより理解できるようになる可能性がある場合に，
 # 一定の限られた資源を競合する（代替）選択肢の間に期待利得を最大化する方法で割り当てなければならない問題である
-from ray.tune.schedulers import AsyncHyperBandScheduler
+# from ray.tune.schedulers import AsyncHyperBandScheduler
 # 同時並列で実行する学習の数を制限することができる
 # https://qiita.com/_akisato/items/f2bdbe37df5dffc883fc
-from ray.tune.suggest import ConcurrencyLimiter
+# from ray.tune.suggest import ConcurrencyLimiter
 # Nevergradを使用してハイパーパラメータを最適化します。
 # Nevergradは、Facebookが提供するオープンソースのツールで、派生的な自由な最適化が可能です。詳細は https://github.com/facebookresearch/nevergrad をご覧ください。
-from ray.tune.suggest.nevergrad import NevergradSearch
+# from ray.tune.suggest.nevergrad import NevergradSearch
 
 from analyze import analyze_fills, get_empty_analysis, objective_function
 from backtest import backtest, plot_wrap
@@ -61,9 +63,14 @@ def create_config(backtest_config: dict) -> dict:
         elif k in ['n_close_orders', 'leverage']:
             # tune.randint:整数値をlowerとupperの間で一様にサンプリングします。
             # https://docs.ray.io/en/master/tune/api_docs/search_space.html#tune-randint
-            config[k] = tune.randint(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1] + 1)
+            # config[k] = tune.randint(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1] + 1)
+            # https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html#optuna.trial.Trial.suggest_float
+            config[k] = trial.suggest_int("config" + k, backtest_config['ranges'][k][0],
+                                            backtest_config['ranges'][k][1] + 1)
         else:
-            config[k] = tune.uniform(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1])
+            # config[k] = tune.uniform(backtest_config['ranges'][k][0], backtest_config['ranges'][k][1])
+            config[k] = trial.suggest_uniform("config" + k, backtest_config['ranges'][k][0],
+                                            backtest_config['ranges'][k][1] + 1)
     return config
 
 
@@ -71,7 +78,9 @@ def clean_start_config(start_config: dict, config: dict, ranges: dict) -> dict:
     clean_start = {}
     for k, v in start_config.items():
         if k in config and k not in ['do_long', 'do_shrt']:
-            if type(config[k]) == ray.tune.sample.Float or type(config[k]) == ray.tune.sample.Integer:
+            # if type(config[k]) == ray.tune.sample.Float or type(config[k]) == ray.tune.sample.Integer:
+            # https://note.nkmk.me/python-check-int-float/
+            if isinstance(config[k], float) or isinstance(config[k], int):
                 clean_start[k] = min(max(v, ranges[k][0]), ranges[k][1])
     return clean_start
 
@@ -147,9 +156,15 @@ def simple_sliding_window_wrap(config, ticks):
     except Exception as e:
         print('c', e)
         objective = -1
-    tune.report(objective=objective, daily_gain=result['average_daily_gain'], closest_liquidation=result['closest_liq'],
-                max_hrs_no_fills=result['max_hrs_no_fills'],
-                max_hrs_no_fills_same_side=result['max_hrs_no_fills_same_side'])
+    # https://docs.ray.io/en/master/tune/api_docs/trainable.html
+    # tune.report(objective=objective, daily_gain=result['average_daily_gain'], closest_liquidation=result['closest_liq'],
+    #             max_hrs_no_fills=result['max_hrs_no_fills'],
+    #             max_hrs_no_fills_same_side=result['max_hrs_no_fills_same_side'])
+    # https://qiita.com/studio_haneya/items/2dc3ba9d7cafa36ddffa
+    # https://optuna.readthedocs.io/en/v1.0.0/reference/study.html
+    # TODO: 上記APIでdaily_gainなどを設定する必要がありそう？
+    study = optuna.create_study()
+    study.optimize(objective)
 
 
 def tune_report(result):
