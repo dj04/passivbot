@@ -238,6 +238,8 @@ def backtest_tune(ticks: np.ndarray, backtest_config: dict, current_best: Union[
                                                          or type(config[k]) == ray.tune.sample.Integer]),
         raise_on_failed_trial=False
     )
+    # ray.init()を呼び出したプロセスが終了すると、Rayランタイムも終了します。Ray を明示的に停止または再起動するには、shutdown API を使用します。
+    # https://docs.ray.io/en/master/starting-ray.html
     ray.shutdown()
     return analysis
 
